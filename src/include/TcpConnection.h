@@ -35,11 +35,12 @@ public:
 
     bool connected() const { return state_ == kConnected; }
 
-
     void send(const std::string &buf);
     void send(Buffer *buf);
 
     void shutdown();
+
+    void forceClose();
 
     void setConnectionCallback(const ConnectionCallback& cb) { connectionCallback_ = cb; }
 
@@ -76,7 +77,9 @@ private:
 
     void sendInLoop(const void* message, size_t len);
     void sendInLoop(const std::string& message);
+
     void shutdownInLoop();
+    void forceCloseInLoop();
 
     EventLoop *loop_; 
     const std::string name_;

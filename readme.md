@@ -22,7 +22,7 @@
 
   
 
-  ![Logger](https://github.com/ZDeHn/mymuduo/blob/master/image/Logger.png)
+  ![Logger](https://github.com/ZDeHn/mymuduo/blob/master/image/Log.png)
 
   
 

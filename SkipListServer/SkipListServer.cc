@@ -176,14 +176,14 @@ private:
 
 int main(){
 
+    muduozdh::Logger::setLogFileName("./SkipListServer.log");
+
     muduozdh::EventLoop loop;
     muduozdh::InetAddress addr(8080);
 
     int skipListMaxLevel = 6;
 
     SkipListServer server(&loop, addr, "skipListServer", skipListMaxLevel, muduozdh::TcpServer::kReusePort );
-
-    muduozdh::Logger::setLogFileName("./SkipListServer.log");
 
     server.start();
     loop.loop();

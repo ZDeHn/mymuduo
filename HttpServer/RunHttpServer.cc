@@ -6,12 +6,13 @@
 
 int main(){
 
+    muduozdh::Logger::setLogFileName("./HttpServer.log");
+
     muduozdh::EventLoop loop;
     muduozdh::InetAddress addr(80);
 
     HttpServer httpServer(&loop, addr, "httpServer", muduozdh::TcpServer::kReusePort);
 
-    muduozdh::Logger::setLogFileName("./HttpServer.log");
 
     httpServer.start();
     loop.loop();

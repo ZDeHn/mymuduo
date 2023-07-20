@@ -124,7 +124,7 @@ HttpContext::HeaderState HttpContext::processHeader(muduozdh::Buffer *buf){
                 request_.addHeader(key,value);
 
                 // add for debug
-                LOG << "http headers insert key: " << key << " value: " << value;
+                // LOG << "http headers insert key: " << key << " value: " << value;
 
                 now_read_line_begin = i;
                 buf->retrieveUntil(buf->peek() + i + 1);

@@ -92,8 +92,8 @@ void HttpServer::onMessage(const muduozdh::TcpConnectionPtr& conn, muduozdh::Buf
 
     if(context->gotAll()){
         LOG << "parseRequest success!";
-        onRequest(conn, context->request());
-        // testRequest(conn, context->request());
+        // onRequest(conn, context->request());
+        testRequest(conn, context->request());
         context->reset();
     }
 

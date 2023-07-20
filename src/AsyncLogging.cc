@@ -42,7 +42,7 @@ void AsyncLogging::threadFunc(){
     
     startMutex_.unlock();
 
-    LogFile output(basename_);
+    LogFile output(basename_, 1024*1024*10);
 
     BufferPtr newBuffer1(new Buffer);
     BufferPtr newBuffer2(new Buffer);

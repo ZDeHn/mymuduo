@@ -1,7 +1,7 @@
 #pragma once
 
-#include <muduozdh/noncopyable.h>
-#include <muduozdh/Timestamp.h>
+#include "noncopyable.h"
+#include "Timestamp.h"
 
 #include <unordered_map>
 #include <string>

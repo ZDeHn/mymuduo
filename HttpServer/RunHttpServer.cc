@@ -1,12 +1,11 @@
 #include "HttpServer.h"
 
-#include <muduozdh/Logging.h>
-#include <muduozdh/EventLoop.h>
-
+#include "Logging.h"
+#include "EventLoop.h"
 
 int main(){
 
-    muduozdh::Logger::setLogFileName("./HttpServer.log");
+    muduozdh::Logger::setLogFileName("./HttpServer");
 
     muduozdh::EventLoop loop;
     muduozdh::InetAddress addr(80);

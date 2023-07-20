@@ -2,8 +2,8 @@
 
 #include "HttpRequest.h"
 
-#include <muduozdh/Buffer.h>
-#include <muduozdh/Timestamp.h>
+#include "Buffer.h"
+#include "Timestamp.h"
 
 #include <string>
 

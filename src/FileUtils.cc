@@ -3,7 +3,7 @@
 using namespace muduozdh;
 
 AppendFile::AppendFile(std::string filename)
-    : fp_(fopen(filename.c_str(), "ae")){
+    : fp_(fopen(filename.c_str(), "ae")), writtenBytes_(0){
 
     setbuffer(fp_, buffer_, sizeof buffer_);
 }
@@ -12,19 +12,23 @@ AppendFile::~AppendFile() { fclose(fp_); }
 
 void AppendFile::append(const char* logline, const size_t len){
 
-    size_t n = this->write(logline, len);
-    size_t remain = len - n;
+    size_t written = 0;
 
-    while(remain > 0){
-        size_t x = this->write(logline + n, remain);
-        if(x == 0){
+    while (written != len){
+
+        size_t remain = len - written;
+        size_t n = write(logline + written, remain);
+        if (n != remain){
+
             int err = ferror(fp_);
-            if (err) fprintf(stderr, "AppendFile::append() failed !\n");
-            break;
+            if (err){
+                break;
+            }
         }
-        n += x;
-        remain = len - n;
+        written += n;
     }
+
+    writtenBytes_ += written;
 }
 
 void AppendFile::flush() { fflush(fp_); }

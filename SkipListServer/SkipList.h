@@ -1,5 +1,7 @@
 #include "Node.h"
 
+#include "Logging.h"
+
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
@@ -53,7 +55,7 @@ private:
 };
 
 
-#include <muduozdh/Logging.h>
+
 
 template<typename K, typename V> 
 SkipList<K, V>::SkipList(int maxLevel) 

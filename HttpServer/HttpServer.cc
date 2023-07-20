@@ -2,7 +2,8 @@
 #include "HttpResponse.h"
 #include "HttpContext.h"
 #include "MimeType.h"
-#include <muduozdh/Logging.h>
+
+#include "Logging.h"
 
 #include <unistd.h>
 #include <fcntl.h>

@@ -1,10 +1,10 @@
 #include "SkipList.h"
 #include "Message.h"
 
-#include <muduozdh/TcpServer.h>
-#include <muduozdh/InetAddress.h>
-#include <muduozdh/Logging.h>
-#include <muduozdh/Buffer.h>
+#include "TcpServer.h"
+#include "InetAddress.h"
+#include "Logging.h"
+#include "Buffer.h"
 
 #include <string>
 #include <functional>
@@ -176,7 +176,7 @@ private:
 
 int main(){
 
-    muduozdh::Logger::setLogFileName("./SkipListServer.log");
+    muduozdh::Logger::setLogFileName("./SkipListServer");
 
     muduozdh::EventLoop loop;
     muduozdh::InetAddress addr(8080);

@@ -9,10 +9,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/src/include)
 include_directories(${PROJECT_SOURCE_DIR}/HttpServer)
 include_directories(${PROJECT_SOURCE_DIR}/SkiplistServer)
-
-link_directories(${PROJECT_SOURCE_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIR}/testcase)
 
 add_subdirectory(src)
 add_subdirectory(HttpServer)
 add_subdirectory(SkipListServer)
 add_subdirectory(testcase)
+
+link_directories(${PROJECT_SOURCE_DIR}/lib)

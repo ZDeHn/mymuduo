@@ -14,7 +14,7 @@
 ### 安装
 
 ```shell
-sudo ./autobuild.sh
+sudo ./build.sh
 ```
 
 

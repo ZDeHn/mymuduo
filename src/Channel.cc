@@ -50,7 +50,7 @@ void Channel::handleEvent(Timestamp receiveTime){
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
 
-    LOG << "channel handleEvent revents" << revents_;
+    LOG_INFO << "channel handleEvent revents" << revents_;
 
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN))
     {

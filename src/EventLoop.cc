@@ -20,8 +20,7 @@ int createEventfd(){
     
     if (evtfd < 0){
 
-        LOG << "EventFd error " << errno;
-        exit(1);
+        LOG_FATAL << "EventFd error " << errno;
     }
 
     return evtfd;
@@ -32,11 +31,11 @@ EventLoop::EventLoop()
     , wakeupFd_(createEventfd()), wakeupChannel_(new Channel(this, wakeupFd_)), timerQueue_(new TimerQueue(this)){
 
 
-    LOG << "EventLoop Created in thread " << threadId_;
+    LOG_INFO << "EventLoop Created in thread " << threadId_;
     
     if (t_loopInThisThread){
 
-        LOG << "Another EventLoop exists in this Thread "<< threadId_;
+        LOG_FATAL << "Another EventLoop exists in this Thread "<< threadId_;
     }
     else{
         t_loopInThisThread = this;
@@ -55,13 +54,12 @@ EventLoop::~EventLoop(){
     t_loopInThisThread = nullptr;
 }
 
-// 开启事件循环
 void EventLoop::loop(){
 
     looping_ = true;
     quit_ = false;
 
-    LOG << "EventLoop start Looping"; 
+    LOG_INFO << "EventLoop start Looping"; 
 
     while(!quit_){
 
@@ -76,7 +74,7 @@ void EventLoop::loop(){
         doPendingFunctors();
     }
 
-    LOG << "EventLoop stop Looping";
+    LOG_INFO << "EventLoop stop Looping";
 
     looping_ = false;
 }
@@ -119,7 +117,7 @@ void EventLoop::handleRead(){
   ssize_t n = read(wakeupFd_, &one, sizeof one);
   if (n != sizeof one){
 
-    LOG << "EventLoop::hreadleRead() reads " << n << "bytes instead of 8";
+    LOG_INFO << "EventLoop::hreadleRead() reads " << n << "bytes instead of 8";
   
   }
 
@@ -130,7 +128,7 @@ void EventLoop::wakeup(){
     ssize_t n = write(wakeupFd_, &one, sizeof one);
     if (n != sizeof one){
 
-        LOG << "EventLoop::wakeup() writes " << n << "bytes instead of 8";
+        LOG_INFO << "EventLoop::wakeup() writes " << n << "bytes instead of 8";
     
     }
 }

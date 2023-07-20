@@ -13,7 +13,7 @@ static int createNonblocking(){
 
     int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
     if (sockfd < 0) {
-        LOG << "listen socket create error : " << errno;
+        LOG_ERROR << "listen socket create error : " << errno;
     }
 }
 
@@ -59,10 +59,10 @@ void Acceptor::handleRead(){
     }
     else{
 
-        LOG << "accept error " << errno;
+        LOG_INFO << "accept error " << errno;
 
         if (errno == EMFILE){
-            LOG << "sockfd reached limit ";
+            LOG_ERROR << "sockfd reached limit ";
         }
     }
 }

@@ -52,8 +52,6 @@ void AsyncLogging::threadFunc(){
     BufferVector buffersToWrite;
     buffersToWrite.reserve(16);
 
-    std::cout<<running_<<std::endl;
-
     while (running_){
 
         {

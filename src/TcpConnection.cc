@@ -19,8 +19,7 @@ static EventLoop* CheckLoopNotNull(EventLoop *loop){
 
     if (loop == nullptr){
 
-        LOG << "TcpConnection Loop is null！" ;
-        exit(1);
+        LOG_FATAL << "TcpConnection Loop is null！" ;
     }
     return loop;
 }
@@ -45,7 +44,7 @@ TcpConnection::TcpConnection(EventLoop *loop, const std::string &nameArg, int so
         std::bind(&TcpConnection::handleError, this)
     );
 
-    LOG << "TcpConnection :: ctor[" << name_ << "] at fd =" << sockfd;
+    LOG_INFO << "TcpConnection :: ctor[" << name_ << "] at fd =" << sockfd;
     
     socket_->setKeepAlive(true);
 }
@@ -53,7 +52,7 @@ TcpConnection::TcpConnection(EventLoop *loop, const std::string &nameArg, int so
 
 TcpConnection::~TcpConnection(){
 
-    LOG << "TcpConnction::dtor[" << name_<< "] at fd = " << channel_->fd() << " state = " << (int)state_;
+    LOG_INFO << "TcpConnction::dtor[" << name_<< "] at fd = " << channel_->fd() << " state = " << (int)state_;
 }
 
 void TcpConnection::send(const std::string &buf){
@@ -96,7 +95,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len){
 
     if (state_ == kDisconnected){
 
-        LOG << "disconnected, give up writing !";
+        LOG_INFO << "disconnected, give up writing !";
         return;
     }
 
@@ -118,7 +117,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len){
             nwrote = 0;
             if (errno != EWOULDBLOCK){
 
-                LOG << "TcpConnection::sendInLoop";
+                LOG_INFO << "TcpConnection::sendInLoop";
 
                 if (errno == EPIPE || errno == ECONNRESET){
                     faultError = true;

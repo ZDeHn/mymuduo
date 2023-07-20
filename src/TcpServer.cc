@@ -11,8 +11,7 @@ static EventLoop* CheckLoopNotNull(EventLoop *loop){
 
     if (loop == nullptr){
 
-        LOG << "mainLoop is null";
-        exit(1);
+        LOG_FATAL << "mainLoop is null";
     }
     return loop;
 }
@@ -58,14 +57,14 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr){
     ++nextConnId_;
     std::string connName = name_ + buf;
 
-    LOG << "TcpServer::newConnection ["<< name_ << "] - new conncetion [" << connName << "] from " << peerAddr.toIpPort(); 
+    LOG_INFO << "TcpServer::newConnection ["<< name_ << "] - new conncetion [" << connName << "] from " << peerAddr.toIpPort(); 
 
     sockaddr_in local;
     ::bzero(&local, sizeof local);
     socklen_t addrlen = sizeof local;
     if (::getsockname(sockfd, (sockaddr*)&local, &addrlen) < 0){
 
-        LOG << "sockets::getLocalAddr";
+        LOG_INFO << "sockets::getLocalAddr";
     }
 
     InetAddress localAddr(local);

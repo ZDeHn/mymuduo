@@ -13,7 +13,7 @@ int createTimerfd(){
     int timerfd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
     
     if(timerfd < 0){
-        LOG << "Failed in timrfd_create";
+        LOG_ERROR << "Failed in timrfd_create";
     }
 
     return timerfd;
@@ -72,7 +72,7 @@ void TimerQueue::resetTimerfd(int timerfd_, Timestamp expiration){
     newValue.it_value = ts;
 
     if (::timerfd_settime(timerfd_, 0, &newValue, &oldValue)){
-        LOG << "timerfd_settime faield()";
+        LOG_ERROR << "timerfd_settime faield()";
     }
 }
 
@@ -82,7 +82,7 @@ void ReadTimerFd(int timerfd){
     ssize_t readn = ::read(timerfd, &read_byte, sizeof(read_byte));
 
     if(readn != sizeof(read_byte)){
-        LOG << "TimerQueue::ReadTimerFd read_size < 0";
+        LOG_ERROR << "TimerQueue::ReadTimerFd read_size < 0";
     }
 }
 

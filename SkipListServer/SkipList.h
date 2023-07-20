@@ -272,23 +272,6 @@ int SkipList<K, V>::size(){
     return elementCount_;
 }
 
-template<typename K, typename V>
-void SkipList<K, V>::displayList(){
-
-    std::cout<< "*****************Skip List*****************" << std::endl;
-
-    for(int i = 0;i<=skipListLevel_;i++){
-        Node<K, V> *node = this->header_->next()[i];
-        std::cout << "Level " << i << ": ";
-        while(node != NULL){
-            std::cout << node->key() << ":" << node->value() << ";";
-            node = node->next()[i];
-        } 
-        std::cout << std::endl;
-    }
-
-}
-
 
 template<typename K, typename V> 
 bool SkipList<K, V>::isValidString(const std::string& str){

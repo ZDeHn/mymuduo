@@ -6,7 +6,7 @@
 
 - 仿照muduo库实现了EventLoop、EventLoopThread、EventLoopThreadPool、TcpConnection、TcpServer等muduo库中的网络IO核心类，muduo库中的网络IO核心类的关系如图所示
 
-  ![muduo](.\image\muduo.png)
+  ![muduo](https://github.com/ZDeHn/mymuduo/blob/master/image/muduo.png)
 
   
 
@@ -22,7 +22,7 @@
 
   
 
-  ![Logger](.\image\Logger.png)
+  ![Logger](https://github.com/ZDeHn/mymuduo/blob/master/image/Log.png)
 
   
 

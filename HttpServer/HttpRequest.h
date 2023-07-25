@@ -1,6 +1,5 @@
 #pragma once
 
-#include "noncopyable.h"
 #include "Timestamp.h"
 
 #include <unordered_map>
@@ -9,152 +8,154 @@
 class HttpRequest{
 
 public:
-    enum Method {kInvalid, kGet, kPost, kHead, kPut, kDelete};
-    enum Version {kUnknown, kHttp10, kHttp11};
 
-    HttpRequest()
-        : method_(kInvalid), version_(kUnknown) {}
+    enum Method{
+        INVALID,
+        GET,
+        POST,
+        HEAD,
+        PUT,
+        DELETE,
+    };
 
-    void setVersion(Version v){ 
-        version_ = v; 
-    }
+    enum Version{
+        UNKNOWN,
+        HTTP10,
+        HTTP11,
+    };
 
+    HttpRequest(): method_(INVALID), version_(UNKNOWN) { }
+
+
+    void setVersion(Version version) { version_ = version; }
     Version version() const { return version_; }
 
     bool setMethod(const char* start, const char* end){
 
-        std::string m(start, end);
-        if(m == "GET"){
-            method_ = kGet;
+        std::string method(start, end);
+
+        if(method == "GET"){
+            method_ = GET;
         }
-        else if (m == "POST"){
-            method_ = kPost;
+        else if(method == "POST"){
+            method_ = POST;
         }
-        else if (m == "HEAD"){
-            method_ = kHead;
+        else if(method == "HEAD"){
+            method_ = HEAD;
         }
-        else if (m == "PUT"){
-          method_ = kPut;
+        else if(method == "PUT"){
+            method_ = PUT;
         }
-        else if (m == "DELETE"){
-          method_ = kDelete;
+        else if(method == "DELETE"){
+            method_ = DELETE;
         }
         else{
-          method_ = kInvalid;
+            method = INVALID;
         }
-        return method_ != kInvalid;
+        
+        return method_ != INVALID;
+
     }
 
     Method method() const { return method_; }
 
-    const char* methodString() const{
+    const char* methodString() const {
 
-        const char* result = "UNKNOWN";
-
-        switch(method_)
+        const char* result = "UNKOWN";
+        switch (method_)
         {
-          case kGet:
+        case GET:
             result = "GET";
             break;
-          case kPost:
+        case POST:
             result = "POST";
-            break;
-          case kHead:
+        case HEAD:
             result = "HEAD";
             break;
-          case kPut:
+        case PUT:
             result = "PUT";
-            break;
-          case kDelete:
+        case DELETE:
             result = "DELETE";
             break;
-          default:
+        default:
             break;
         }
         return result;
     }
 
-    void setPath(const char *start, const char * end){
-        path_.assign(start, end);
+
+    void setPath(const char* start, const char* end){
+        if(start != end && *start == '/'){
+            path_.assign(start+1,end);
+        }
+        else{
+            path_.assign(start,end);
+        }
     }
     const std::string& path() const { return path_; }
 
-    void setQuery(const char *start, const char *end){
-        query_.assign(start,end);
+    void setQuery(const char* start, const char* end){
+        query_.assign(start, end);
     }
     const std::string& query() const { return query_; }
 
-    void setReceiveTime(muduozdh::Timestamp t){
-        receiveTime_ = t;
-    }
+    void setBody(const std::string& body) { body_ = body; }
+    const std::string& body() const{ return body_; }
+    
+    void setReciveTime(muduozdh::Timestamp time) { receiveTime_ = time; }
     muduozdh::Timestamp receiveTime() const { return receiveTime_; }
 
-    void addHeader(const char *start, const char* colon, const char *end){
+    void addHeader(const char* start, const char* colon, const char* end){
 
-        std::string field(start, colon);
+        std::string key(start, colon);
+        
         ++colon;
-
-        while(colon < end && isspace(*colon)) colon++;
-
+        while(colon < end && isspace(*colon)){
+            ++colon;
+        }
         std::string value(colon, end);
-        while(!value.empty() && isspace(value[value.size() - 1])){
+
+        while(!value.empty() &&isspace(value[value.size() - 1])){
             value.resize(value.size() - 1);
         }
-        
-        headers_[field] = value;
-
-    }
-
-    void addHeader(std::string key, std::string value){
 
         headers_[key] = value;
 
     }
-
-    std::string getHeader(const std::string &field) const{
-
+    std::string getHeader(const std::string& key) const{
         std::string result;
-        auto it = headers_.find(field);
+
+        auto it = headers_.find(key);
         if(it != headers_.end()){
             result = it->second;
         }
         return result;
-
     }
 
-    const std::unordered_map<std::string, std::string>& headers() const{
-        return headers_;
+    const std::unordered_map<std::string, std::string> headers() const { return headers_; }
+
+    void swap(HttpRequest& that){
+        std::swap(method_, that.method_);
+        std::swap(version_, that.version_);
+        path_.swap(that.path_);
+        query_.swap(that.query_);
+        receiveTime_.swap(that.receiveTime_);
+        headers_.swap(that.headers_);
     }
-
-    void setBody(std::string body){
-        body_ = body;
-    }
-
-    std::string body(){
-        return body_;
-    }
-
-    void swap(HttpRequest &rhs){
-
-        std::swap(method_, rhs.method_);
-        std::swap(version_, rhs.version_);
-        path_.swap(rhs.path_);
-        query_.swap(rhs.query_);
-        std::swap(receiveTime_, rhs.receiveTime_);
-        headers_.swap(rhs.headers_);    
-    }
-
-
 
 private:
 
     Method method_;
     Version version_;
+
     std::string path_;
     std::string query_;
-    muduozdh::Timestamp receiveTime_;
-    std::unordered_map<std::string, std::string> headers_;
-
     std::string body_;
 
+    muduozdh::Timestamp receiveTime_;
+
+    std::unordered_map<std::string, std::string> headers_;
+
 };
+
+

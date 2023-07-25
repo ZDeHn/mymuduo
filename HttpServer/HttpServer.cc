@@ -4,6 +4,7 @@
 #include "MimeType.h"
 
 #include "Logging.h"
+#include "MemoryPool.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -23,7 +24,7 @@ void testRequest(const muduozdh::TcpConnectionPtr& conn, const HttpRequest& req)
 
 void defaultHttpCallback(const HttpRequest&, HttpResponse* resp){
 
-    resp->setStatusCode(HttpResponse::k404NotFound);
+    resp->setStatusCode(HttpResponse::_404NOTFOUND);
     resp->setStatusMessage("Not Found");
     resp->setCloseConnection(true);
 }
@@ -56,19 +57,22 @@ HttpServer::HttpServer(muduozdh::EventLoop *loop,const muduozdh::InetAddress &li
 
 void HttpServer::start(){
     
-    LOG<<"HttpServer[" << server_.name() << "] starts listening on " << server_.ipPort();
+    LOG_INFO <<"HttpServer[" << server_.name() << "] starts listening on " << server_.ipPort();
     server_.start();
 }
 
 void HttpServer::onConnection(const muduozdh::TcpConnectionPtr& conn){
 
     if(conn->connected()){
-        LOG << "new Connection arrived";
-        std::shared_ptr<HttpContext> context(new HttpContext());
+        LOG_INFO << "new Connection arrived";
+        // std::shared_ptr<HttpContext> context(new HttpContext());
+        std::shared_ptr<HttpContext> context(httpContextMemoryPool_.newData(),[&](HttpContext* context){
+            httpContextMemoryPool_.deleteData(context);
+        });
         conn->setContext(context);
     }
     else{
-        LOG << "Connection closed";
+        LOG_INFO << "Connection closed";
     }
 }
 
@@ -76,22 +80,21 @@ void HttpServer::onConnection(const muduozdh::TcpConnectionPtr& conn){
 
 void HttpServer::onMessage(const muduozdh::TcpConnectionPtr& conn, muduozdh::Buffer* buf, muduozdh::Timestamp receiveTime){
 
-    // std::unique_ptr<HttpContext> context(new HttpContext);
 
-    // LOG << "Message Arrive";
     
     HttpContext* context = (HttpContext *)(conn->context().get());
 
-    LOG << "get Context";
+    LOG_DEBUG << "get Context";
 
     if(!context->parseRequest(buf, receiveTime)){
 
         conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
+        LOG_INFO << "request error";
         conn->shutdown();
     }
 
     if(context->gotAll()){
-        LOG << "parseRequest success!";
+        LOG_INFO << "parseRequest success!";
         // onRequest(conn, context->request());
         testRequest(conn, context->request());
         context->reset();
@@ -104,11 +107,11 @@ void HttpServer::onMessage(const muduozdh::TcpConnectionPtr& conn, muduozdh::Buf
 void HttpServer::onRequest(const muduozdh::TcpConnectionPtr& conn, const HttpRequest& req){
 
 
-
     const std::string& connection = req.getHeader("Connection");
-    
-    std::string requestPath = req.path();
+    bool close = connection == "close" ||
+        (req.version() == HttpRequest::HTTP10 && connection != "Keep-Alive");
 
+    std::string requestPath = req.path();
     int dotPos = requestPath.find('.');
     std::string filetype;
 
@@ -119,7 +122,7 @@ void HttpServer::onRequest(const muduozdh::TcpConnectionPtr& conn, const HttpReq
         std::string fileSuffix = requestPath.substr(dotPos);
         std::transform(fileSuffix.begin() , fileSuffix.end(), fileSuffix.begin(), tolower);
 
-        LOG << fileSuffix;
+        LOG_DEBUG << fileSuffix;
         
         filetype = MimeType::getMime(fileSuffix);
         
@@ -133,18 +136,21 @@ void HttpServer::onRequest(const muduozdh::TcpConnectionPtr& conn, const HttpReq
 
     requestPath = resourcePath + requestPath;
 
-    HttpResponse response(true);
+    HttpResponse response(close);
     muduozdh::Buffer responseBuffer;    
     std::string body;    
 
     struct stat sbuf;
+
     if(stat(requestPath.c_str(), &sbuf) < 0) {
         
-        LOG << "file: " << requestPath << " not found";
+        LOG_ERROR << "file: " << requestPath << " not found";
         defaultHttpCallback(req, &response);
         response.appendToBuffer(&responseBuffer);
         conn->send(&responseBuffer);
-        conn->shutdown();
+        if(response.closeConnection()){
+            conn->shutdown();
+        }
         return ;
     }
     
@@ -156,11 +162,13 @@ void HttpServer::onRequest(const muduozdh::TcpConnectionPtr& conn, const HttpReq
         int srcFd = ::open(requestPath.c_str(), O_RDONLY, 0);
         if(srcFd < 0){
  
-            LOG << "file: " << requestPath << " not found";
+            LOG_ERROR << "file: " << requestPath << " not found";
             defaultHttpCallback(req, &response);
             response.appendToBuffer(&responseBuffer);
             conn->send(&responseBuffer);
-            conn->shutdown();
+            if(response.closeConnection()){
+                conn->shutdown();
+            }
             return ;
         }
 
@@ -171,11 +179,14 @@ void HttpServer::onRequest(const muduozdh::TcpConnectionPtr& conn, const HttpReq
 
             munmap(mmapRet, sbuf.st_size);
 
-            LOG << "file: " << requestPath << " map error!";
+            LOG_ERROR << "file: " << requestPath << " map error!";
             defaultHttpCallback(req, &response);
             response.appendToBuffer(&responseBuffer);
             conn->send(&responseBuffer);
-            conn->shutdown();
+
+            if(response.closeConnection()){
+                conn->shutdown();
+            }
             return ;
         }
         
@@ -188,16 +199,23 @@ void HttpServer::onRequest(const muduozdh::TcpConnectionPtr& conn, const HttpReq
     response.setBody(body);
     response.appendToBuffer(&responseBuffer);
     conn->send(&responseBuffer);
-    conn->shutdown();
+    if(response.closeConnection()){
+        conn->shutdown();
+    }
 }
 
 void testRequest(const muduozdh::TcpConnectionPtr& conn, const HttpRequest& req){
 
-    LOG << req.path();
+    LOG_DEBUG << req.path();
 
-    HttpResponse response(true);
+    const std::string& connection = req.getHeader("Connection");
+
+    bool close = connection == "close" ||
+        (req.version() == HttpRequest::HTTP10 && connection != "Keep-Alive");
+
+    HttpResponse response(close);
     response.setContentType("text/html");
-    response.addHeader("Server","Tiny Web Server");
+    response.addHeader("Server","HTTP Server");
     std::string body = "Hello";
     response.setBody(body);
 
@@ -206,7 +224,10 @@ void testRequest(const muduozdh::TcpConnectionPtr& conn, const HttpRequest& req)
     response.appendToBuffer(&responseBuffer);
         
     conn->send(&responseBuffer);
-    conn->shutdown();
+
+    if(response.closeConnection()){
+        conn->shutdown();
+    }
     return ;
     
 }

@@ -69,7 +69,10 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr){
 
     InetAddress localAddr(local);
 
-    TcpConnectionPtr conn(new TcpConnection(ioLoop,connName,sockfd,localAddr,peerAddr));
+    // TcpConnectionPtr conn(new TcpConnection(ioLoop,connName,sockfd,localAddr,peerAddr));
+    TcpConnectionPtr conn(connectionMemoryPool_.newData(ioLoop, connName, sockfd, localAddr, peerAddr), [&](TcpConnection* connection){
+        connectionMemoryPool_.deleteData(connection);
+    });
 
     connections_[connName] = conn;
 
@@ -89,7 +92,7 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn){
 
 void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn){
 
-    LOG << "TcpSErver::removeConnectionInLoop [" << name_ << "] - connection " << conn->name();
+    LOG_INFO << "TcpServer::removeConnectionInLoop [" << name_ << "] - connection " << conn->name();
 
     connections_.erase(conn->name());
     EventLoop *ioLoop = conn->getLoop(); 

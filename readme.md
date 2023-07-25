@@ -6,7 +6,7 @@
 
 - 仿照muduo库实现了EventLoop、EventLoopThread、EventLoopThreadPool、TcpConnection、TcpServer等muduo库中的网络IO核心类，muduo库中的网络IO核心类的关系如图所示
 
-  ![muduo](https://github.com/ZDeHn/mymuduo/blob/master/image/muduo.png)
+  ![muduo](.\image\muduo.png)
 
   
 
@@ -22,7 +22,7 @@
 
   
 
-  ![Logger](https://github.com/ZDeHn/mymuduo/blob/master/image/Log.png)
+  ![Logger](.\image\Logger.png)
 
   
 
@@ -32,7 +32,7 @@
 
 
 
-- 基于重写的muduo库实现了http服务器，提供了http报文解析功能，并支持POST请求
+- 基于重写的muduo库实现了http服务器，提供了http报文解析功能，并支持POST请求。新增内存池优化http
 - 基于重写的muduo库实现了简单的跳表服务器以及简单的跳表服务器客户端，可以实现增删改查
 
 
@@ -67,35 +67,93 @@ sudo ./build.sh
 
 ### Http服务器压力测试
 
-- 使用webbench工具进行http压力测试工具进行测试，将Http服务器部署到云服务器上（2核，低带宽），本地机器使用以下指令
+- 使用apachbench工具进行http压力测试工具进行测试，将Http服务器部署到云服务器上（2核，2G），本地机器使用以下指令
 
   ```shell
-  webbench -c 1000 -t 60 http://host/
+  ab -n 100000 -c 1000 -k http://host/
   ```
 
 - 测试结果
 
-  ```
-  1000 clients, cunning 60 sec.
-  
-  Speed=8709 pages/min, 12773 bytes/sec.
-  Requests: 8709 susceed, 0 failed
-  ```
+  - 未加内存池
 
-- 结果较差原因
-
-  - 测试的服务器只支持短链接，频繁建立与撤销TCP连接造成了性能下降
-
-  - 云服务器性能较低：核心数较少，带宽较低
-
-  - 没有针对http做特殊优化
-
+    ```
+    Concurrency Level:      1000
+    Time taken for tests:   33.566 seconds
+    Complete requests:      100000
+    Failed requests:        0
+    Non-2xx responses:      100000
+    Keep-Alive requests:    100000
+    Total transferred:      10800000 bytes
+    HTML transferred:       500000 bytes
+    Requests per second:    2979.23 [#/sec] (mean)
+    Time per request:       335.657 [ms] (mean)
+    Time per request:       0.336 [ms] (mean, across all concurrent requests)
+    Transfer rate:          314.22 [Kbytes/sec] received
     
+    Connection Times (ms)
+                  min  mean[+/-sd] median   max
+    Connect:        0    2 268.4      0   31548
+    Processing:    10   49 127.0     13    6928
+    Waiting:       10   49 127.0     13    6928
+    Total:         10   52 297.1     13   31777
+    
+    Percentage of the requests served within a certain time (ms)
+      50%     13
+      66%     14
+      75%     14
+      80%     15
+      90%    226
+      95%    233
+      98%    445
+      99%    673
+     100%  31777 (longest request)
+    ```
+
+  - TcpServer以及HttpServer增加TcpConnection和HttpContext内存池
+
+    ```
+    Concurrency Level:      1000
+    Time taken for tests:   32.936 seconds
+    Complete requests:      100000
+    Failed requests:        0
+    Non-2xx responses:      100000
+    Keep-Alive requests:    100000
+    Total transferred:      10800000 bytes
+    HTML transferred:       500000 bytes
+    Requests per second:    3036.17 [#/sec] (mean)
+    Time per request:       329.362 [ms] (mean)
+    Time per request:       0.329 [ms] (mean, across all concurrent requests)
+    Transfer rate:          320.22 [Kbytes/sec] received
+    
+    Connection Times (ms)
+                  min  mean[+/-sd] median   max
+    Connect:        0    0  22.7      0    7167
+    Processing:    10   43 111.4     12    6768
+    Waiting:       10   43 111.4     12    6768
+    Total:         10   43 113.6     12    7185
+    
+    Percentage of the requests served within a certain time (ms)
+      50%     12
+      66%     13
+      75%     14
+      80%     14
+      90%    224
+      95%    232
+      98%    244
+      99%    453
+     100%   7185 (longest request)
+    ```
+
+    增加内存池提升效果并不明显，原因可能是限制其速度的最根本原因是服务器带宽，并不是本机内存分配时消耗的时间，如果增加网络带宽，内存池的效果会更明显
+
+  
 
 ### Reference
 
 
 
 - https://github.com/chenshuo/muduo
+- https://github.com/cacay/MemoryPool
 - https://github.com/linyacool/WebServer
 - https://github.com/youngyangyang04/Skiplist-CPP

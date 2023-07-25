@@ -8,6 +8,7 @@
 #include "Callbacks.h"
 #include "TcpConnection.h"
 #include "Buffer.h"
+#include "MemoryPool.h"
 
 #include <functional>
 #include <string>
@@ -72,6 +73,8 @@ private:
 
     int nextConnId_;
     ConnectionMap connections_; 
+
+    MemoryPool<TcpConnection, sizeof(TcpConnection), 3000> connectionMemoryPool_;
 };
 
 }

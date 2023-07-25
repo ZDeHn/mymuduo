@@ -1,92 +1,55 @@
 #pragma once
 
 #include "HttpRequest.h"
-
 #include "Buffer.h"
 #include "Timestamp.h"
 
-#include <string>
-
 class HttpContext{
+
 
 public:
 
-
-    enum ProcessState {
-        STATE_PARSE_URI = 1,
-        STATE_PARSE_HEADERS,
-        STATE_RECV_BODY,
-        STATE_ANALYSIS,
-        STATE_FINISH
-    };
-
-    enum URIState {
-        PARSE_URI_AGAIN = 1,
-        PARSE_URI_ERROR,
-        PARSE_URI_SUCCESS,
-    };
-
-    enum HeaderState {
-        PARSE_HEADER_SUCCESS = 1,
-        PARSE_HEADER_AGAIN,
-        PARSE_HEADER_ERROR
-    };
-
-    enum AnalysisState { ANALYSIS_SUCCESS = 1, ANALYSIS_ERROR };
-
-    enum HeaderParseState {
-        H_START = 0,
-        H_KEY,
-        H_COLON,
-        H_SPACES_AFTER_COLON,
-        H_VALUE,
-        H_CR,
-        H_LF,
-        H_END_CR,
-        H_END_LF
-    };
-
-    enum ConnectionState { H_CONNECTED = 0, H_DISCONNECTING, H_DISCONNECTED };
-
-    enum HttpMethod { METHOD_POST = 1, METHOD_GET, METHOD_HEAD };
-
-    enum HttpVersion { HTTP_10 = 1, HTTP_11 };
-
     enum HttpRequestParseState{
-        kExpectRequestLine,
-        kExpectHeaders,
-        kExpectBody,
-        kGotAll,
-        kError
+        STATE_PARSE_LINE,
+        STATE_PARSE_HEADERS,
+        STATE_PARSE_BODY,
+        STATE_GET_ALL,
     };
 
-HttpContext()
-    :state_(kExpectRequestLine) , hState_(H_START){ } 
+    enum LineState{
+        PARSE_LINE_SUCCESS,
+        PARSE_LINE_AGAIN,
+        PARSE_LINE_ERROR,
+    };
 
-bool parseRequest(muduozdh::Buffer *buf, muduozdh::Timestamp receiveTime);
+    enum HeaderState{
+        PARSE_HEADER_SUCCESS,
+        PARSE_HEADER_AGAIN,
+        PARSE_HEADER_ERROR,
+    };
 
-bool gotAll() const { return state_ == kGotAll; }
+    HttpContext(): state_(STATE_PARSE_LINE) { }
 
-void reset() {
+    bool parseRequest(muduozdh::Buffer* buf, muduozdh::Timestamp receiveTime);
 
-    state_ = kExpectRequestLine;
-    HttpRequest dummy;
-    request_.swap(dummy);
+    bool gotAll() { return state_ == STATE_GET_ALL; }
 
-}
+    void reset(){
+        state_ = STATE_PARSE_LINE;
+        HttpRequest newRequest;
+        request_.swap(newRequest);
+    }
 
-const HttpRequest& request() const { return request_; }
-HttpRequest &request() { return request_; }
+    const HttpRequest& request() const{ return request_; }
+    HttpRequest& request() { return request_; }
 
+    
 private:
 
-    URIState processRequestLine(muduozdh::Buffer *buf);
-    URIState processRequestLine(const char *begin, const char *end);
+    LineState ParseRequestLine(const char* begin, const char* end);
+
     HttpRequestParseState state_;
     HttpRequest request_;
 
-    HeaderState processHeader(muduozdh::Buffer *buf);
     
-    HeaderParseState hState_;
-
 };

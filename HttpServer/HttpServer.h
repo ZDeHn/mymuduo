@@ -2,7 +2,7 @@
 
 #include "HttpResponse.h"
 #include "HttpContext.h"
-
+// #include "MemoryPool.h"
 #include "TcpServer.h"
 
 #include <string>
@@ -34,4 +34,6 @@ private:
 
     const static std::string resourcePath;
     
+    muduozdh::MemoryPool<HttpContext, sizeof(HttpContext), 1000> httpContextMemoryPool_;
+
 };

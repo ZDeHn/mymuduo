@@ -22,6 +22,10 @@ public:
 
     static const int kMicroSecondsPerSecond = 1000 * 1000;
 
+    void swap(Timestamp& that){
+        std::swap(microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
+    }
+
     static Timestamp invalid(){
         return Timestamp();
     }

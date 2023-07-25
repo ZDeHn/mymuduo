@@ -39,6 +39,7 @@ private:
     NewConnectionCallback newConnectionCallback_;
     
     bool listenning_;
+    int idleFd_;
 
 };
 

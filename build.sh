@@ -22,3 +22,11 @@ for header in `ls *.h`
 do
     sudo cp $header /usr/include/muduozdh
 done
+
+cd ..
+cd ..
+
+cd `pwd`/lib
+
+
+sudo cp libmuduozdh.a /usr/local/lib

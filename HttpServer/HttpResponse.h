@@ -11,15 +11,15 @@ public:
     
     enum HttpStatusCode{
 
-        kUnknown,
-        k200Ok = 200,
-        k301MovedPermanently = 301,
-        k400BadRequest = 400,
-        k404NotFound = 404,
+        UNKNOWN,
+        _200OK = 200,
+        _301MOVEDPERMANETLY = 301,
+        _400BADREQUEST = 400,
+        _404NOTFOUND = 404,
     };
 
     explicit HttpResponse(bool close)
-        : statusCode_(kUnknown), closeConnection_(close) {}
+        : statusCode_(UNKNOWN), closeConnection_(close) {}
 
     void setStatusCode(HttpStatusCode code){
         statusCode_ = code;
